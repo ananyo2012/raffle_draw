@@ -1,76 +1,50 @@
 import random
+import csv
+import time
 from progress.bar import Bar
 
-
-PEOPLE = {
-     0: 'people 0',
-     1: 'people 1',
-     2: 'people 2',
-     3: 'people 3',
-     4: 'people 4',
-     5: 'people 5',
-     6: 'people 6',
-     7: 'people 7',
-     8: 'people 8',
-     9: 'people 9',
-     10: 'people 10',
-     11: 'people 11',
-     12: 'people 12',
-     13: 'people 13',
-     14: 'people 14',
-     15: 'people 15',
-     16: 'people 16',
-     17: 'people 17',
-     18: 'people 18',
-     19: 'people 19',
-     20: 'people 20',
-     21: 'people 21',
-     22: 'people 22',
-     23: 'people 23',
-     24: 'people 24',
-     25: 'people 25',
-     26: 'people 26',
-     27: 'people 27',
-     28: 'people 28',
-     29: 'people 29',
-     30: 'people 30',
-     31: 'people 31',
-     32: 'people 32',
-     33: 'people 33',
-     34: 'people 34',
-     35: 'people 35',
-     36: 'people 36',
-     37: 'people 37',
-     38: 'people 38',
-     39: 'people 39',
-     40: 'people 40',
-     41: 'people 41',
-     42: 'people 42',
-     43: 'people 43',
-     44: 'people 44',
-     45: 'people 45',
-     46: 'people 46',
-     47: 'people 47',
-     48: 'people 48',
-     49: 'people 49'
-}
-
-
 class RaffleDraw:
-    PROCESSED = []
+    def __init__(self, filename):
+        self.participants = {}
+        self.filename = filename
+        self.read_csv(self.filename)
 
-    @classmethod
-    def get_winner(cls):
+
+    def get_winner(self):
         print("\n\n")
         bar = Bar('And the winner is...', max=10)
         for i in range(10):
-            [x for x in range(999999)]  # short pause...
+            [x for x in range(999999)]  # short pause
             bar.next()
         bar.finish()
-        key = random.choice(list(PEOPLE.keys()))
-        print("\n\n\t{}".format(PEOPLE[key]))
-        print("\t{}\n\n".format(key))
+
+        time.sleep(3)
+
+        raffle_set = list(self.participants.keys())
+        winner_id = random.choice(raffle_set)
+        winner_name = self.participants[winner_id]
+
+        del self.participants[winner_id]
+        self.write_csv(self.filename)
+
+        print("\n\n\t{}".format(winner_name))
+        print("\t{}\n\n".format(winner_id))
         print("-" * 60 + "\n")
 
-    def parse_excel(self):
-        pass
+    def read_csv(self,filename):
+        with open(filename) as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                self.participants[row['id']] = row['name']
+
+    def write_csv(self, filename):
+        with open(filename, 'w') as csvfile:
+            fieldnames = ['id', 'name']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for key in self.participants:
+                writer.writerow({'id' : key, 'name' : self.participants[key]})
+
+
+raffle = RaffleDraw('data.csv')
+raffle.get_winner()
